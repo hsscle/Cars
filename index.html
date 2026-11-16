@@ -1,0 +1,282 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Топ машин з OTOMOTO</title>
+<style>
+  :root{
+    --bg:#f6f5f2; --card:#ffffff; --ink:#1d1d1b; --muted:#6b6a66; --line:#e4e2dc;
+    --accent:#b4232a; --good:#1f7a3d; --mid:#b07a00; --bad:#a3352d; --chip:#efede8;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#16161a; --card:#1f1f24; --ink:#ecebe7; --muted:#9b9a95; --line:#2f2f36;
+      --accent:#e5534b; --good:#4cc47a; --mid:#e0ad3a; --bad:#e5736b; --chip:#2a2a31; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+  header{padding:20px 20px 8px;max-width:1400px;margin:0 auto}
+  h1{margin:0 0 4px;font-size:22px}
+  .sub{color:var(--muted);font-size:13px;line-height:1.4}
+  .panel{max-width:1400px;margin:12px auto;padding:14px 16px;background:var(--card);border:1px solid var(--line);border-radius:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px 16px}
+  .f label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+  .f input[type=text],.f select{width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font-size:14px}
+  .f input[type=range]{width:100%}
+  .val{font-weight:600;color:var(--ink)}
+  .bar{max-width:1400px;margin:0 auto;padding:0 16px 6px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+  .count{color:var(--muted);font-size:13px}
+  button.reset{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:13px}
+  .wrap{max-width:1400px;margin:0 auto 30px;padding:0 16px;overflow-x:auto}
+  table{width:100%;border-collapse:separate;border-spacing:0;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  th,td{padding:9px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:top}
+  td.note{white-space:normal;min-width:240px;color:var(--muted);font-size:13px}
+  th{position:sticky;top:0;background:var(--chip);font-size:12px;color:var(--muted);cursor:pointer;user-select:none}
+  th:hover{color:var(--ink)}
+  th .arr{opacity:.6;margin-left:3px}
+  tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:var(--chip)}
+  a.car{color:var(--ink);font-weight:600;text-decoration:none;border-bottom:1px solid var(--accent)}
+  a.car:hover{color:var(--accent)}
+  .score{display:inline-block;min-width:42px;text-align:center;font-weight:700;padding:3px 7px;border-radius:7px;color:#fff}
+  .tag{display:inline-block;padding:2px 7px;border-radius:999px;background:var(--chip);font-size:12px}
+  .num{text-align:right;font-variant-numeric:tabular-nums}
+  .rank{color:var(--muted);font-variant-numeric:tabular-nums}
+  .empty{padding:30px;text-align:center;color:var(--muted)}
+  .pot{max-width:1400px;margin:14px auto 4px;padding:0 16px}
+  .pot h2{font-size:17px;margin:6px 0 2px}
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:10px;margin-top:10px}
+  .pc{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+  .pc .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+  .pc .meta{color:var(--muted);font-size:12px;margin:3px 0 8px}
+  .pc .arrow{font-weight:700;white-space:nowrap}
+  .pc .ask{font-size:13px;line-height:1.45}
+  .pc .ask b{color:var(--muted);font-weight:600}
+  #mcards{display:none}
+  tr.sold td{opacity:.45} tr.sold a.car,.mc.sold a.car{text-decoration:line-through;border-bottom:none}
+  .mc.sold{opacity:.5}
+  .btns{display:flex;gap:8px;flex-wrap:wrap}
+  #check{border-color:var(--accent);color:var(--accent);font-weight:600}
+  .cpbox{max-width:1400px;margin:0 auto 10px;padding:0 16px}
+  .cpbox textarea{width:100%;height:110px;margin-top:6px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font-size:12px;padding:8px}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;max-width:90vw;text-align:center}
+  .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+  .mc{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+  .mc-top{display:flex;align-items:center;gap:8px}
+  .mc-top .car{flex:1;font-size:15px}
+  .mc-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;margin:10px 0 8px}
+  .mc-grid span{display:block;font-size:11px;color:var(--muted)}
+  .mc-grid b{font-weight:600;font-size:13px}
+  .mc-note{font-size:13px;color:var(--muted);line-height:1.4}
+  @media (max-width:1250px){ .c-note,.c-origin{display:none} }
+  @media (max-width:1050px){ .c-seller,.c-rank{display:none} th,td{padding:8px 7px} }
+  @media (max-width:860px){ table{display:none} #mcards{display:block} .wrap{overflow:visible} }
+  @media (max-width:600px){
+    header{padding:14px 12px 4px} h1{font-size:19px}
+    .panel{margin:10px 12px;padding:12px;grid-template-columns:1fr 1fr;gap:10px}
+    .panel .f:first-child{grid-column:1/-1}
+    .wrap,.bar,.pot,.tabs{padding-left:12px;padding-right:12px}
+    .tab{flex:1;padding:9px 8px;font-size:13px}
+    .cards{grid-template-columns:1fr}
+  }
+  @media (max-width:380px){ .panel{grid-template-columns:1fr} .mc-grid{grid-template-columns:1fr} }
+  .tabs{max-width:1400px;margin:10px auto 0;padding:0 16px;display:flex;gap:6px}
+  .tab{border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:10px 10px 0 0;padding:9px 16px;cursor:pointer;font-size:14px;font-weight:600}
+  .tab.on{color:var(--ink);border-bottom-color:var(--card);box-shadow:inset 0 -3px 0 var(--accent)}
+  .view[hidden]{display:none}
+  details.potwrap summary{cursor:pointer;color:var(--muted);font-size:13px;margin-top:8px}
+  tr.main{cursor:pointer} .mc{cursor:pointer}
+  .chev{display:inline-block;color:var(--muted);font-size:11px;margin-right:4px;transition:transform .15s}
+  .open .chev{transform:rotate(90deg)}
+  tr.det td{white-space:normal;background:var(--bg);padding:14px 16px}
+  tbody tr.det:hover{background:transparent}
+  .dbox{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px 22px;max-width:1100px;font-size:13px;line-height:1.45}
+  .dbox h4{margin:0 0 4px;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+  .dbox ul{margin:0;padding-left:18px} .dbox li{margin:2px 0}
+  .dbox .pros h4{color:var(--good)} .dbox .cons h4{color:var(--bad)}
+  .dbox .sum{grid-column:1/-1;padding:9px 12px;border-left:3px solid var(--accent);background:var(--card);border-radius:6px}
+  .dbox .full{grid-column:1/-1}
+  .mc .dbox{grid-template-columns:1fr;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+  .more{font-size:12px;color:var(--muted);margin-top:6px}
+  .clr{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;background:var(--chip);color:var(--muted);font-size:12px;font-weight:500;white-space:nowrap}
+</style>
+</head>
+<body>
+<header>
+  <h1>Топ машин з OTOMOTO</h1>
+  <div class="sub">Оцінка: 10 = найкраще, що реально купити за ~40 тис. zł (з урахуванням надійності, історії, продавця і відстані). Відстань — приблизно по дорозі від Rudy Śląskiej. Натисни на назву, щоб відкрити оголошення; натисни на рядок, щоб побачити плюси, мінуси й підсумок; натисни на заголовок колонки, щоб сортувати.</div>
+</header>
+
+<div class="tabs"><button class="tab on" data-v="top">Топ машин</button><button class="tab" data-v="potential">Потенційно хороші</button></div>
+
+<section class="pot view" id="v-potential" hidden>
+  <h2>Потенційно хороші — треба уточнити</h2>
+  <div class="sub">Машини, яким я зняв бали переважно через брак інформації. Якщо перевірка пройде добре, оцінка зросте до вказаної. Відсортовано за потенціалом.</div>
+  <div class="cards" id="potCards"></div>
+</section>
+
+<div class="view" id="v-top">
+<div class="panel">
+  <div class="f"><label>Пошук (модель, місто)</label><input type="text" id="q" placeholder="напр. Mazda, Kraków, червона"></div>
+  <div class="f"><label>Мін. оцінка: <span class="val" id="vScore"></span></label><input type="range" id="minScore" min="5" max="10" step="0.1"></div>
+  <div class="f"><label>Макс. відстань: <span class="val" id="vDist"></span></label><input type="range" id="maxDist" min="10" max="650" step="10"></div>
+  <div class="f"><label>Макс. ціна: <span class="val" id="vPrice"></span></label><input type="range" id="maxPrice" min="29000" max="45000" step="500"></div>
+  <div class="f"><label>Пальне</label><select id="fuel"></select></div>
+  <div class="f"><label>Коробка</label><select id="gb"></select></div>
+  <div class="f"><label>Продавець</label><select id="seller"></select></div>
+  <div class="f"><label>Походження</label><select id="origin"></select></div>
+  <div class="f"><label>Марка</label><select id="brand"></select></div>
+</div>
+
+<div class="bar">
+  <div class="count" id="count"></div>
+  <div class="btns"><button class="reset" id="check">🔄 Перевірити, що продано</button><button class="reset" id="reset">Скинути фільтри</button></div>
+</div>
+
+<div class="cpbox" id="cpbox" hidden><div class="sub">Скопіюй цей текст і встав у чат проєкту:</div><textarea id="cptxt" readonly></textarea></div>
+<div class="wrap">
+  <table>
+    <thead><tr id="head"></tr></thead>
+    <tbody id="body"></tbody>
+  </table>
+  <div id="mcards"></div>
+</div>
+</div>
+
+<script>
+let R=[];
+
+function renderPot(){
+  const list=R.filter(r=>r.pot&&r.status!=='sold').sort((a,b)=>b.pot-a.pot||b.score-a.score);
+  $('potCards').innerHTML=list.map(r=>`<div class="pc">
+    <div class="top"><span><a class="car" href="${r.url}" target="_blank" rel="noopener">${r.n}</a>${clr(r)}</span>
+      <span class="arrow"><span class="score" style="background:${color(r.score)}">${r.score.toFixed(1)}</span> → <span class="score" style="background:${color(r.pot)}">${r.pot.toFixed(1)}</span></span></div>
+    <div class="meta">${r.year} · ${fmt(r.km)} км · ${fmt(r.price)} zł · ${r.city} (~${r.dist} км)</div>
+    <div class="ask"><b>Уточнити:</b> ${r.ask}</div></div>`).join('');
+}
+
+const COLS=[
+ {k:'rank',t:'#'},{k:'n',t:'Машина'},{k:'score',t:'Оцінка'},{k:'eng',t:'Мотор'},{k:'gb',t:'Коробка'},
+ {k:'year',t:'Рік'},{k:'km',t:'Пробіг'},{k:'price',t:'Ціна, zł'},{k:'city',t:'Місто'},{k:'dist',t:'~км'},
+ {k:'seller',t:'Продавець'},{k:'origin',t:'Походження'},{k:'note',t:'Коротко'}
+];
+
+const $=id=>document.getElementById(id);
+let sortK='score', sortDir=-1;
+const D={q:'',minScore:5,maxDist:650,maxPrice:45000,fuel:'',gb:'',seller:'',origin:'',brand:''};
+
+function setUI(s){$('q').value=s.q;$('minScore').value=s.minScore;$('maxDist').value=s.maxDist;$('maxPrice').value=s.maxPrice;
+ ['fuel','gb','seller','origin','brand'].forEach(k=>$(k).value=s[k]);}
+function read(){return{q:$('q').value.trim().toLowerCase(),minScore:+$('minScore').value,maxDist:+$('maxDist').value,maxPrice:+$('maxPrice').value,
+ fuel:$('fuel').value,gb:$('gb').value,seller:$('seller').value,origin:$('origin').value,brand:$('brand').value};}
+
+function color(s){return s>=9?'var(--good)':s>=8?'#3f8f5a':s>=7?'var(--mid)':'var(--bad)';}
+const fmt=n=>n.toLocaleString('uk-UA').replace(/,/g,' ');
+const clr=r=>r.color?`<span class="clr">${r.color}</span>`:'';
+const OPEN=new Set();
+const lst=a=>a&&a.length?'<ul>'+a.map(x=>`<li>${x}</li>`).join('')+'</ul>':'';
+function det(r){
+  const p=[];
+  if(r.sum)p.push(`<div class="sum"><b>Підсумок:</b> ${r.sum}</div>`);
+  if(r.pros&&r.pros.length)p.push(`<div class="pros"><h4>Плюси</h4>${lst(r.pros)}</div>`);
+  if(r.cons&&r.cons.length)p.push(`<div class="cons"><h4>Мінуси</h4>${lst(r.cons)}</div>`);
+  if(r.ask)p.push(`<div class="full"><h4>Що уточнити</h4>${r.ask}${r.pot?` <span class="arrow">→ можлива оцінка <span class="score" style="background:${color(r.pot)}">${r.pot.toFixed(1)}</span></span>`:''}</div>`);
+  if(r.note)p.push(`<div class="full"><h4>Коротко</h4>${r.status==='sold'?'<b>ПРОДАНО / ЗНЯТО.</b> ':''}${r.note}</div>`);
+  return `<div class="dbox">${p.join('')}</div>`;
+}
+function toggle(e){
+  if(e.target.closest('a'))return;
+  const el=e.target.closest('[data-u]');if(!el)return;
+  const u=el.dataset.u;const was=OPEN.has(u);OPEN.clear();if(!was)OPEN.add(u);render();
+  if(!was){const t=[...document.querySelectorAll('[data-u]')].find(x=>x.dataset.u===u&&x.offsetParent);if(t)t.scrollIntoView({block:'nearest'});}
+}
+
+function render(){
+  const f=read();
+  $('vScore').textContent=f.minScore.toFixed(1);
+  $('vDist').textContent=f.maxDist>=650?'будь-яка':f.maxDist+' км';
+  $('vPrice').textContent=f.maxPrice>=45000?'будь-яка':fmt(f.maxPrice)+' zł';
+  try{localStorage.setItem('carsF',JSON.stringify(f));}catch(e){}
+  let rows=R.filter(r=>
+    r.score>=f.minScore-1e-9 && (f.maxDist>=650||r.dist<=f.maxDist) && (f.maxPrice>=45000||r.price<=f.maxPrice) &&
+    (!f.fuel||r.fuel===f.fuel) && (!f.gb||r.gb===f.gb) && (!f.seller||r.seller===f.seller) && (!f.brand||r.brand===f.brand) &&
+    (!f.origin|| (f.origin==='pl'&&r.origin==='Польща') || (f.origin==='imp'&&r.origin!=='Польща') || (f.origin==='noam'&&r.origin!=='США'&&r.origin!=='Канада')) &&
+    (!f.q||(r.n+' '+r.city+' '+r.eng+' '+(r.color||'')).toLowerCase().includes(f.q))
+  );
+  rows.sort((a,b)=>{const sa=a.status==='sold',sb=b.status==='sold';if(sa!==sb)return sa?1:-1;const x=a[sortK]??0,y=b[sortK]??0;if(typeof x!==typeof y)return typeof x==='number'?-1:1;return (typeof x==='number'?x-y:String(x).localeCompare(String(y),'uk'))*sortDir;});
+  $('head').innerHTML=COLS.map(c=>`<th class="c-${c.k}" data-k="${c.k}">${c.t}${sortK===c.k?`<span class="arr">${sortDir>0?'▲':'▼'}</span>`:''}</th>`).join('');
+  document.querySelectorAll('th').forEach(th=>th.onclick=()=>{const k=th.dataset.k;if(sortK===k)sortDir*=-1;else{sortK=k;sortDir=(['score','year','pot'].includes(k)?-1:1);}render();});
+  $('body').innerHTML=rows.length?rows.map(r=>`<tr class="main ${r.status==='sold'?'sold':''} ${OPEN.has(r.url)?'open':''}" data-u="${r.url}">
+    <td class="rank c-rank">${r.rank}</td>
+    <td class="c-n"><span class="chev">▶</span><a class="car" href="${r.url}" target="_blank" rel="noopener">${r.n}</a>${clr(r)}</td>
+    <td class="c-score"><span class="score" style="background:${color(r.score)}">${r.score.toFixed(1)}</span></td>
+    <td class="c-eng">${r.eng}</td><td class="c-gb"><span class="tag">${r.gb}</span></td>
+    <td class="num c-year">${r.year}</td><td class="num c-km">${fmt(r.km)}</td><td class="num c-price">${fmt(r.price)}</td>
+    <td class="c-city">${r.city}</td><td class="num c-dist">${r.dist}</td><td class="c-seller">${r.seller}</td><td class="c-origin">${r.origin}</td>
+    <td class="note c-note">${r.status==='sold'?'<b>ПРОДАНО / ЗНЯТО.</b> ':''}${r.note}</td></tr>${OPEN.has(r.url)?`<tr class="det"><td colspan="13">${det(r)}</td></tr>`:''}`).join(''):`<tr><td colspan="13" class="empty">Нічого не знайдено — послаб фільтри</td></tr>`;
+  $('mcards').innerHTML=rows.length?rows.map(r=>`<div class="mc ${r.status==='sold'?'sold':''} ${OPEN.has(r.url)?'open':''}" data-u="${r.url}">
+    <div class="mc-top"><span class="rank">#${r.rank}</span><a class="car" href="${r.url}" target="_blank" rel="noopener">${r.n}</a>${clr(r)}<span class="score" style="background:${color(r.score)}">${r.score.toFixed(1)}</span></div>
+    <div class="mc-grid">
+      <div><span>Ціна</span><b>${fmt(r.price)} zł</b></div>
+      <div><span>Рік</span><b>${r.year}</b></div>
+      <div><span>Пробіг</span><b>${fmt(r.km)} км</b></div>
+      <div><span>Місто</span><b>${r.city} · ~${r.dist} км</b></div>
+      <div><span>Мотор</span><b>${r.eng}</b></div>
+      <div><span>Коробка</span><b>${r.gb}</b></div>
+      <div><span>Продавець</span><b>${r.seller}</b></div>
+      <div><span>Походження</span><b>${r.origin}</b></div>
+    </div>
+    ${OPEN.has(r.url)?det(r):`<div class="mc-note">${r.status==='sold'?'<b>ПРОДАНО / ЗНЯТО.</b> ':''}${r.note}</div>`}
+    <div class="more"><span class="chev">▶</span>${OPEN.has(r.url)?'Згорнути':'Плюси, мінуси, підсумок'}</div></div>`).join(''):'<div class="empty">Нічого не знайдено — послаб фільтри</div>';
+  const ns=R.filter(r=>r.status==='sold').length;$('count').textContent=`Показано ${rows.length} з ${R.length} машин`+(ns?` · продано/знято: ${ns}`:'');
+}
+function opts(id,vals,all){const s=$(id);s.innerHTML='<option value="">'+all+'</option>'+vals.map(v=>`<option>${v}</option>`).join('');}
+function buildOpts(){
+opts('fuel',[...new Set(R.map(r=>r.fuel))],'Будь-яке');
+opts('gb',[...new Set(R.map(r=>r.gb))],'Будь-яка');
+opts('seller',['Приватний','Фірма'],'Будь-який');
+$('origin').innerHTML='<option value="">Будь-яке</option><option value="pl">Тільки Польща</option><option value="imp">Тільки пригнані</option><option value="noam">Без США/Канади</option>';
+opts('brand',[...new Set(R.map(r=>r.brand))].sort(),'Усі марки');
+}
+
+function prep(){
+  R.forEach(r=>{r.brand=r.n.split(' ')[0];});
+  const act=R.filter(r=>r.status!=='sold').sort((a,b)=>b.score-a.score);
+  act.forEach((r,i)=>r.rank=i+1);
+  R.filter(r=>r.status==='sold').forEach(r=>r.rank='—');
+}
+function copyCheck(){
+  const links=R.filter(r=>r.status!=='sold').map(r=>r.url);
+  const txt='Перевір статус оголошень (активне / продано / видалене):\n'+links.join('\n');
+  const done=()=>toast('Скопійовано '+links.length+' посилань — встав у чат проєкту');
+  try{navigator.clipboard.writeText(txt).then(done,()=>fallback(txt));}catch(e){fallback(txt);}
+}
+function fallback(txt){$('cpbox').hidden=false;$('cptxt').value=txt;$('cptxt').select();toast('Скопіюй текст з поля нижче');}
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('on'),3500);}
+
+async function init(){
+  try{ R=await (await fetch('data.json',{cache:'no-store'})).json(); }
+  catch(e){ $('body').innerHTML='<tr><td colspan="13" class="empty">Не вдалося завантажити дані</td></tr>'; return; }
+  prep(); buildOpts();
+  let saved=null;try{saved=JSON.parse(localStorage.getItem('carsF')||'null');}catch(e){}
+setUI(Object.assign({},D,saved||{}));
+['q','minScore','maxDist','maxPrice','fuel','gb','seller','origin','brand'].forEach(id=>$(id).addEventListener('input',render));
+$('reset').onclick=()=>{setUI(D);render();};
+$('check').onclick=copyCheck;
+$('body').addEventListener('click',toggle);$('mcards').addEventListener('click',toggle);
+renderPot();
+render();
+function show(v){if(v!=='potential')v='top';
+  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+  $('v-top').hidden=v!=='top';$('v-potential').hidden=v!=='potential';}
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{show(b.dataset.v);try{location.hash=b.dataset.v;}catch(e){}});
+window.addEventListener('hashchange',()=>show(location.hash.slice(1)));
+show(location.hash.slice(1));
+}
+init();
+</script>
+<div class="toast" id="toast"></div>
+</body>
+</html>
+
+</body></html>
