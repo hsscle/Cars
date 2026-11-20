@@ -98,6 +98,7 @@
   .dbox .full{grid-column:1/-1}
   .mc .dbox{grid-template-columns:1fr;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
   .more{font-size:12px;color:var(--muted);margin-top:6px}
+  .pch{display:block;font-size:11px;font-weight:600;white-space:nowrap}.pch.dn{color:var(--good)}.pch.up{color:var(--bad)}
   .clr{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;background:var(--chip);color:var(--muted);font-size:12px;font-weight:500;white-space:nowrap}
 </style>
 </head>
@@ -172,6 +173,7 @@ function read(){return{q:$('q').value.trim().toLowerCase(),minScore:+$('minScore
 
 function color(s){return s>=9?'var(--good)':s>=8?'#3f8f5a':s>=7?'var(--mid)':'var(--bad)';}
 const fmt=n=>n.toLocaleString('uk-UA').replace(/,/g,' ');
+const pc=r=>r.pp&&r.pp!==r.price?`<span class="pch ${r.price<r.pp?'dn':'up'}" title="Було ${fmt(r.pp)} zł">${r.price<r.pp?'↓':'↑'} було ${fmt(r.pp)}</span>`:'';
 const clr=r=>r.color?`<span class="clr">${r.color}</span>`:'';
 const OPEN=new Set();
 const lst=a=>a&&a.length?'<ul>'+a.map(x=>`<li>${x}</li>`).join('')+'</ul>':'';
@@ -211,13 +213,13 @@ function render(){
     <td class="c-n"><span class="chev">▶</span><a class="car" href="${r.url}" target="_blank" rel="noopener">${r.n}</a>${clr(r)}</td>
     <td class="c-score"><span class="score" style="background:${color(r.score)}">${r.score.toFixed(1)}</span></td>
     <td class="c-eng">${r.eng}</td><td class="c-gb"><span class="tag">${r.gb}</span></td>
-    <td class="num c-year">${r.year}</td><td class="num c-km">${fmt(r.km)}</td><td class="num c-price">${fmt(r.price)}</td>
+    <td class="num c-year">${r.year}</td><td class="num c-km">${fmt(r.km)}</td><td class="num c-price">${fmt(r.price)}${pc(r)}</td>
     <td class="c-city">${r.city}</td><td class="num c-dist">${r.dist}</td><td class="c-seller">${r.seller}</td><td class="c-origin">${r.origin}</td>
     <td class="note c-note">${r.status==='sold'?'<b>ПРОДАНО / ЗНЯТО.</b> ':''}${r.note}</td></tr>${OPEN.has(r.url)?`<tr class="det"><td colspan="13">${det(r)}</td></tr>`:''}`).join(''):`<tr><td colspan="13" class="empty">Нічого не знайдено — послаб фільтри</td></tr>`;
   $('mcards').innerHTML=rows.length?rows.map(r=>`<div class="mc ${r.status==='sold'?'sold':''} ${OPEN.has(r.url)?'open':''}" data-u="${r.url}">
     <div class="mc-top"><span class="rank">#${r.rank}</span><a class="car" href="${r.url}" target="_blank" rel="noopener">${r.n}</a>${clr(r)}<span class="score" style="background:${color(r.score)}">${r.score.toFixed(1)}</span></div>
     <div class="mc-grid">
-      <div><span>Ціна</span><b>${fmt(r.price)} zł</b></div>
+      <div><span>Ціна</span><b>${fmt(r.price)} zł</b>${pc(r)}</div>
       <div><span>Рік</span><b>${r.year}</b></div>
       <div><span>Пробіг</span><b>${fmt(r.km)} км</b></div>
       <div><span>Місто</span><b>${r.city} · ~${r.dist} км</b></div>
