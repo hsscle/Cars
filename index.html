@@ -205,7 +205,7 @@ function render(){
     (!f.origin|| (f.origin==='pl'&&r.origin==='Польща') || (f.origin==='imp'&&r.origin!=='Польща') || (f.origin==='noam'&&r.origin!=='США'&&r.origin!=='Канада')) &&
     (!f.q||(r.n+' '+r.city+' '+r.eng+' '+(r.color||'')).toLowerCase().includes(f.q))
   );
-  rows.sort((a,b)=>{const sa=a.status==='sold',sb=b.status==='sold';if(sa!==sb)return sa?1:-1;const x=a[sortK]??0,y=b[sortK]??0;if(typeof x!==typeof y)return typeof x==='number'?-1:1;return (typeof x==='number'?x-y:String(x).localeCompare(String(y),'uk'))*sortDir;});
+  rows.sort((a,b)=>{const x=a[sortK]??0,y=b[sortK]??0;if(typeof x!==typeof y)return typeof x==='number'?-1:1;return (typeof x==='number'?x-y:String(x).localeCompare(String(y),'uk'))*sortDir;});
   $('head').innerHTML=COLS.map(c=>`<th class="c-${c.k}" data-k="${c.k}">${c.t}${sortK===c.k?`<span class="arr">${sortDir>0?'▲':'▼'}</span>`:''}</th>`).join('');
   document.querySelectorAll('th').forEach(th=>th.onclick=()=>{const k=th.dataset.k;if(sortK===k)sortDir*=-1;else{sortK=k;sortDir=(['score','year','pot'].includes(k)?-1:1);}render();});
   $('body').innerHTML=rows.length?rows.map(r=>`<tr class="main ${r.status==='sold'?'sold':''} ${OPEN.has(r.url)?'open':''}" data-u="${r.url}">
