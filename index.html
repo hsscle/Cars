@@ -41,6 +41,7 @@
   .score{display:inline-block;min-width:42px;text-align:center;font-weight:700;padding:3px 7px;border-radius:7px;color:#fff}
   .sv{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}.sv0{background:#d9f2e1;color:#1d6b3a}.sv1{background:#e6eefc;color:#2a4f9a}.sv2{background:#fdebd3;color:#9a5a12}.sv3{background:#fbdada;color:#9c2323}
   .cats{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}.cat{flex:1 1 220px;padding:10px 14px;border-radius:12px;border:1px solid var(--line,#ccc);background:var(--card,#fff);color:inherit;font:inherit;font-weight:600;cursor:pointer;text-align:left}.cat span{opacity:.6;font-weight:500}.cat.on{border-color:#2a6df4;box-shadow:0 0 0 2px #2a6df433}
+  .fcz{display:block;font-size:11px;color:var(--muted);white-space:nowrap}
   .tag{display:inline-block;padding:2px 7px;border-radius:999px;background:var(--chip);font-size:12px}
   .num{text-align:right;font-variant-numeric:tabular-nums}
   .rank{color:var(--muted);font-variant-numeric:tabular-nums}
@@ -163,7 +164,7 @@ function renderPot(){
 }
 
 const COLS=[
- {k:'rank',t:'#'},{k:'n',t:'Машина'},{k:'score',t:'Оцінка'},{k:'eng',t:'Мотор'},{k:'gb',t:'Коробка'},{k:'sv',t:'Обслуговування'},
+ {k:'rank',t:'#'},{k:'n',t:'Машина'},{k:'score',t:'Оцінка'},{k:'eng',t:'Мотор'},{k:'gb',t:'Коробка'},{k:'sv',t:'Обслуговування'},{k:'fc',t:'Розхід, л/100'},
  {k:'year',t:'Рік'},{k:'km',t:'Пробіг'},{k:'price',t:'Ціна, zł'},{k:'city',t:'Місто'},{k:'dist',t:'~км'},
  {k:'seller',t:'Продавець'},{k:'origin',t:'Походження'},{k:'note',t:'Коротко'}
 ];
@@ -183,6 +184,8 @@ const pc=r=>r.pp&&r.pp!==r.price?`<span class="pch ${r.price<r.pp?'dn':'up'}" ti
 const clr=r=>r.color?`<span class="clr">${r.color}</span>`:'';
 const SVL=['Дешеве','Нормальне','Дороге','Дуже дороге'];
 const svt=r=>r.sv==null?'—':`<span class="sv sv${r.sv}">${SVL[r.sv]}</span>`;
+const FP={'Бензин':6.0,'Дизель':6.1,'Гібрид':6.0};
+const fct=r=>{if(r.fc==null)return '—';const lpg=r.fuel==='Бензин+LPG';const zl=lpg?r.fc*1.2*3.0:r.fc*(FP[r.fuel]||6);return `${r.fc.toFixed(1)} л${lpg?' (бенз.)':''}<span class="fcz" title="Орієнтовно: бензин 6.0, дизель 6.1, газ 3.0 zł/л">≈${Math.round(zl)} zł/100 км${lpg?' на газу':''}</span>`;};
 const OPEN=new Set();
 const lst=a=>a&&a.length?'<ul>'+a.map(x=>`<li>${x}</li>`).join('')+'</ul>':'';
 function det(r){
@@ -221,10 +224,10 @@ function render(){
     <td class="rank c-rank">${r.rank}</td>
     <td class="c-n"><span class="chev">▶</span><a class="car" href="${r.url}" target="_blank" rel="noopener">${r.n}</a>${clr(r)}</td>
     <td class="c-score"><span class="score" style="background:${color(r.score)}">${r.score.toFixed(1)}</span></td>
-    <td class="c-eng">${r.eng}</td><td class="c-gb"><span class="tag">${r.gb}</span></td><td class="c-sv">${svt(r)}</td>
+    <td class="c-eng">${r.eng}</td><td class="c-gb"><span class="tag">${r.gb}</span></td><td class="c-sv">${svt(r)}</td><td class="num c-fc">${fct(r)}</td>
     <td class="num c-year">${r.year}</td><td class="num c-km">${fmt(r.km)}</td><td class="num c-price">${fmt(r.price)}${pc(r)}</td>
     <td class="c-city">${r.city}</td><td class="num c-dist">${r.dist}</td><td class="c-seller">${r.seller}</td><td class="c-origin">${r.origin}</td>
-    <td class="note c-note">${r.status==='sold'?'<b>ПРОДАНО / ЗНЯТО.</b> ':''}${r.note}</td></tr>${OPEN.has(r.url)?`<tr class="det"><td colspan="14">${det(r)}</td></tr>`:''}`).join(''):`<tr><td colspan="14" class="empty">Нічого не знайдено — послаб фільтри</td></tr>`;
+    <td class="note c-note">${r.status==='sold'?'<b>ПРОДАНО / ЗНЯТО.</b> ':''}${r.note}</td></tr>${OPEN.has(r.url)?`<tr class="det"><td colspan="15">${det(r)}</td></tr>`:''}`).join(''):`<tr><td colspan="15" class="empty">Нічого не знайдено — послаб фільтри</td></tr>`;
   $('mcards').innerHTML=rows.length?rows.map(r=>`<div class="mc ${r.status==='sold'?'sold':''} ${OPEN.has(r.url)?'open':''}" data-u="${r.url}">
     <div class="mc-top"><span class="rank">#${r.rank}</span><a class="car" href="${r.url}" target="_blank" rel="noopener">${r.n}</a>${clr(r)}<span class="score" style="background:${color(r.score)}">${r.score.toFixed(1)}</span></div>
     <div class="mc-grid">
@@ -235,6 +238,7 @@ function render(){
       <div><span>Мотор</span><b>${r.eng}</b></div>
       <div><span>Коробка</span><b>${r.gb}</b></div>
       <div><span>Обслуговування</span><b>${svt(r)}</b></div>
+      <div><span>Розхід (реальний)</span><b>${fct(r)}</b></div>
       <div><span>Продавець</span><b>${r.seller}</b></div>
       <div><span>Походження</span><b>${r.origin}</b></div>
     </div>
@@ -267,7 +271,7 @@ function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clear
 
 async function init(){
   try{ R=await (await fetch('data.json',{cache:'no-store'})).json(); }
-  catch(e){ $('body').innerHTML='<tr><td colspan="14" class="empty">Не вдалося завантажити дані</td></tr>'; return; }
+  catch(e){ $('body').innerHTML='<tr><td colspan="15" class="empty">Не вдалося завантажити дані</td></tr>'; return; }
   prep(); buildOpts(); renderCats();
   let saved=null;try{saved=JSON.parse(localStorage.getItem('carsF')||'null');}catch(e){}
 setUI(Object.assign({},D,saved||{}));
