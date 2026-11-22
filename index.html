@@ -40,6 +40,7 @@
   a.car:hover{color:var(--accent)}
   .score{display:inline-block;min-width:42px;text-align:center;font-weight:700;padding:3px 7px;border-radius:7px;color:#fff}
   .sv{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}.sv0{background:#d9f2e1;color:#1d6b3a}.sv1{background:#e6eefc;color:#2a4f9a}.sv2{background:#fdebd3;color:#9a5a12}.sv3{background:#fbdada;color:#9c2323}
+  .cats{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}.cat{flex:1 1 220px;padding:10px 14px;border-radius:12px;border:1px solid var(--line,#ccc);background:var(--card,#fff);color:inherit;font:inherit;font-weight:600;cursor:pointer;text-align:left}.cat span{opacity:.6;font-weight:500}.cat.on{border-color:#2a6df4;box-shadow:0 0 0 2px #2a6df433}
   .tag{display:inline-block;padding:2px 7px;border-radius:999px;background:var(--chip);font-size:12px}
   .num{text-align:right;font-variant-numeric:tabular-nums}
   .rank{color:var(--muted);font-variant-numeric:tabular-nums}
@@ -118,6 +119,7 @@
 </section>
 
 <div class="view" id="v-top">
+<div class="cats" id="cats"></div>
 <div class="panel">
   <div class="f"><label>Пошук (модель, місто)</label><input type="text" id="q" placeholder="напр. Mazda, Kraków, червона"></div>
   <div class="f"><label>Мін. оцінка: <span class="val" id="vScore"></span></label><input type="range" id="minScore" min="5" max="10" step="0.1"></div>
@@ -147,6 +149,9 @@
 
 <script>
 let R=[];
+let CAT='car';try{CAT=localStorage.getItem('carsCat')||'car';}catch(e){}
+const CATN={car:'🚗 Легкові (седани, хетчбеки, універсали)',suv:'🚙 Кросовери / позашляховики'};
+function renderCats(){$('cats').innerHTML=Object.keys(CATN).map(k=>`<button class="cat ${k===CAT?'on':''}" data-c="${k}">${CATN[k]} <span>${R.filter(r=>r.cat===k&&r.status!=='sold').length}</span></button>`).join('');document.querySelectorAll('.cat').forEach(b=>b.onclick=()=>{CAT=b.dataset.c;try{localStorage.setItem('carsCat',CAT);}catch(e){}renderCats();render();});}
 
 function renderPot(){
   const list=R.filter(r=>r.pot&&r.status!=='sold').sort((a,b)=>b.pot-a.pot||b.score-a.score);
@@ -203,6 +208,7 @@ function render(){
   $('vPrice').textContent=f.maxPrice>=45000?'будь-яка':fmt(f.maxPrice)+' zł';
   try{localStorage.setItem('carsF',JSON.stringify(f));}catch(e){}
   let rows=R.filter(r=>
+    (r.cat||'car')===CAT &&
     r.score>=f.minScore-1e-9 && (f.maxDist>=650||r.dist<=f.maxDist) && (f.maxPrice>=45000||r.price<=f.maxPrice) &&
     (!f.fuel||r.fuel===f.fuel) && (!f.gb||r.gb===f.gb) && (!f.seller||r.seller===f.seller) && (!f.brand||r.brand===f.brand) &&
     (!f.origin|| (f.origin==='pl'&&r.origin==='Польща') || (f.origin==='imp'&&r.origin!=='Польща') || (f.origin==='noam'&&r.origin!=='США'&&r.origin!=='Канада')) &&
@@ -234,7 +240,7 @@ function render(){
     </div>
     ${OPEN.has(r.url)?det(r):`<div class="mc-note">${r.status==='sold'?'<b>ПРОДАНО / ЗНЯТО.</b> ':''}${r.note}</div>`}
     <div class="more"><span class="chev">▶</span>${OPEN.has(r.url)?'Згорнути':'Плюси, мінуси, підсумок'}</div></div>`).join(''):'<div class="empty">Нічого не знайдено — послаб фільтри</div>';
-  const ns=R.filter(r=>r.status==='sold').length;$('count').textContent=`Показано ${rows.length} з ${R.length} машин`+(ns?` · продано/знято: ${ns}`:'');
+  const ns=R.filter(r=>r.status==='sold').length;$('count').textContent=`Показано ${rows.length} з ${R.filter(r=>(r.cat||'car')===CAT).length} (${CAT==='suv'?'кросовери':'легкові'}) · оцінка 10 = ${CAT==='suv'?'найкращий кросовер':'найкраща легкова'} за 40 тис.`+(ns?` · продано/знято: ${ns}`:'');
 }
 function opts(id,vals,all){const s=$(id);s.innerHTML='<option value="">'+all+'</option>'+vals.map(v=>`<option>${v}</option>`).join('');}
 function buildOpts(){
@@ -247,8 +253,7 @@ opts('brand',[...new Set(R.map(r=>r.brand))].sort(),'Усі марки');
 
 function prep(){
   R.forEach(r=>{r.brand=r.n.split(' ')[0];});
-  const act=R.filter(r=>r.status!=='sold').sort((a,b)=>b.score-a.score);
-  act.forEach((r,i)=>r.rank=i+1);
+  ['car','suv'].forEach(c=>{R.filter(r=>r.status!=='sold'&&(r.cat||'car')===c).sort((a,b)=>b.score-a.score).forEach((r,i)=>r.rank=i+1);});
   R.filter(r=>r.status==='sold').forEach(r=>r.rank='—');
 }
 function copyCheck(){
@@ -263,7 +268,7 @@ function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clear
 async function init(){
   try{ R=await (await fetch('data.json',{cache:'no-store'})).json(); }
   catch(e){ $('body').innerHTML='<tr><td colspan="14" class="empty">Не вдалося завантажити дані</td></tr>'; return; }
-  prep(); buildOpts();
+  prep(); buildOpts(); renderCats();
   let saved=null;try{saved=JSON.parse(localStorage.getItem('carsF')||'null');}catch(e){}
 setUI(Object.assign({},D,saved||{}));
 ['q','minScore','maxDist','maxPrice','fuel','gb','seller','origin','brand'].forEach(id=>$(id).addEventListener('input',render));
