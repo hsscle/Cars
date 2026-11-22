@@ -39,6 +39,7 @@
   a.car{color:var(--ink);font-weight:600;text-decoration:none;border-bottom:1px solid var(--accent)}
   a.car:hover{color:var(--accent)}
   .score{display:inline-block;min-width:42px;text-align:center;font-weight:700;padding:3px 7px;border-radius:7px;color:#fff}
+  .sv{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}.sv0{background:#d9f2e1;color:#1d6b3a}.sv1{background:#e6eefc;color:#2a4f9a}.sv2{background:#fdebd3;color:#9a5a12}.sv3{background:#fbdada;color:#9c2323}
   .tag{display:inline-block;padding:2px 7px;border-radius:999px;background:var(--chip);font-size:12px}
   .num{text-align:right;font-variant-numeric:tabular-nums}
   .rank{color:var(--muted);font-variant-numeric:tabular-nums}
@@ -157,7 +158,7 @@ function renderPot(){
 }
 
 const COLS=[
- {k:'rank',t:'#'},{k:'n',t:'Машина'},{k:'score',t:'Оцінка'},{k:'eng',t:'Мотор'},{k:'gb',t:'Коробка'},
+ {k:'rank',t:'#'},{k:'n',t:'Машина'},{k:'score',t:'Оцінка'},{k:'eng',t:'Мотор'},{k:'gb',t:'Коробка'},{k:'sv',t:'Обслуговування'},
  {k:'year',t:'Рік'},{k:'km',t:'Пробіг'},{k:'price',t:'Ціна, zł'},{k:'city',t:'Місто'},{k:'dist',t:'~км'},
  {k:'seller',t:'Продавець'},{k:'origin',t:'Походження'},{k:'note',t:'Коротко'}
 ];
@@ -175,6 +176,8 @@ function color(s){return s>=9?'var(--good)':s>=8?'#3f8f5a':s>=7?'var(--mid)':'va
 const fmt=n=>n.toLocaleString('uk-UA').replace(/,/g,' ');
 const pc=r=>r.pp&&r.pp!==r.price?`<span class="pch ${r.price<r.pp?'dn':'up'}" title="Було ${fmt(r.pp)} zł">${r.price<r.pp?'↓':'↑'} було ${fmt(r.pp)}</span>`:'';
 const clr=r=>r.color?`<span class="clr">${r.color}</span>`:'';
+const SVL=['Дешеве','Нормальне','Дороге','Дуже дороге'];
+const svt=r=>r.sv==null?'—':`<span class="sv sv${r.sv}">${SVL[r.sv]}</span>`;
 const OPEN=new Set();
 const lst=a=>a&&a.length?'<ul>'+a.map(x=>`<li>${x}</li>`).join('')+'</ul>':'';
 function det(r){
@@ -212,10 +215,10 @@ function render(){
     <td class="rank c-rank">${r.rank}</td>
     <td class="c-n"><span class="chev">▶</span><a class="car" href="${r.url}" target="_blank" rel="noopener">${r.n}</a>${clr(r)}</td>
     <td class="c-score"><span class="score" style="background:${color(r.score)}">${r.score.toFixed(1)}</span></td>
-    <td class="c-eng">${r.eng}</td><td class="c-gb"><span class="tag">${r.gb}</span></td>
+    <td class="c-eng">${r.eng}</td><td class="c-gb"><span class="tag">${r.gb}</span></td><td class="c-sv">${svt(r)}</td>
     <td class="num c-year">${r.year}</td><td class="num c-km">${fmt(r.km)}</td><td class="num c-price">${fmt(r.price)}${pc(r)}</td>
     <td class="c-city">${r.city}</td><td class="num c-dist">${r.dist}</td><td class="c-seller">${r.seller}</td><td class="c-origin">${r.origin}</td>
-    <td class="note c-note">${r.status==='sold'?'<b>ПРОДАНО / ЗНЯТО.</b> ':''}${r.note}</td></tr>${OPEN.has(r.url)?`<tr class="det"><td colspan="13">${det(r)}</td></tr>`:''}`).join(''):`<tr><td colspan="13" class="empty">Нічого не знайдено — послаб фільтри</td></tr>`;
+    <td class="note c-note">${r.status==='sold'?'<b>ПРОДАНО / ЗНЯТО.</b> ':''}${r.note}</td></tr>${OPEN.has(r.url)?`<tr class="det"><td colspan="14">${det(r)}</td></tr>`:''}`).join(''):`<tr><td colspan="14" class="empty">Нічого не знайдено — послаб фільтри</td></tr>`;
   $('mcards').innerHTML=rows.length?rows.map(r=>`<div class="mc ${r.status==='sold'?'sold':''} ${OPEN.has(r.url)?'open':''}" data-u="${r.url}">
     <div class="mc-top"><span class="rank">#${r.rank}</span><a class="car" href="${r.url}" target="_blank" rel="noopener">${r.n}</a>${clr(r)}<span class="score" style="background:${color(r.score)}">${r.score.toFixed(1)}</span></div>
     <div class="mc-grid">
@@ -225,6 +228,7 @@ function render(){
       <div><span>Місто</span><b>${r.city} · ~${r.dist} км</b></div>
       <div><span>Мотор</span><b>${r.eng}</b></div>
       <div><span>Коробка</span><b>${r.gb}</b></div>
+      <div><span>Обслуговування</span><b>${svt(r)}</b></div>
       <div><span>Продавець</span><b>${r.seller}</b></div>
       <div><span>Походження</span><b>${r.origin}</b></div>
     </div>
@@ -258,7 +262,7 @@ function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clear
 
 async function init(){
   try{ R=await (await fetch('data.json',{cache:'no-store'})).json(); }
-  catch(e){ $('body').innerHTML='<tr><td colspan="13" class="empty">Не вдалося завантажити дані</td></tr>'; return; }
+  catch(e){ $('body').innerHTML='<tr><td colspan="14" class="empty">Не вдалося завантажити дані</td></tr>'; return; }
   prep(); buildOpts();
   let saved=null;try{saved=JSON.parse(localStorage.getItem('carsF')||'null');}catch(e){}
 setUI(Object.assign({},D,saved||{}));
