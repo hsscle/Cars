@@ -19,7 +19,7 @@
   header{padding:20px 20px 8px;max-width:1400px;margin:0 auto}
   h1{margin:0 0 4px;font-size:22px}
   .sub{color:var(--muted);font-size:13px;line-height:1.4}
-  .panel{max-width:1400px;margin:12px auto;padding:14px 16px;background:var(--card);border:1px solid var(--line);border-radius:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px 16px}
+  .panel{max-width:1368px;width:calc(100% - 32px);box-sizing:border-box;margin:12px auto;padding:14px 16px;background:var(--card);border:1px solid var(--line);border-radius:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px 16px}
   .f label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
   .f input[type=text],.f select{width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font-size:14px}
   .f input[type=range]{width:100%}
@@ -72,14 +72,27 @@
   .mc-grid span{display:block;font-size:11px;color:var(--muted)}
   .mc-grid b{font-weight:600;font-size:13px}
   .mc-note{font-size:13px;color:var(--muted);line-height:1.4}
-  @media (max-width:1250px){ .c-note,.c-origin{display:none} }
-  @media (max-width:1050px){ .c-seller,.c-rank{display:none} th,td{padding:8px 7px} }
+  .topctl{max-width:1400px;margin:12px auto 0;padding:0 16px;box-sizing:border-box}
+  .s2{display:block;font-size:11.5px;color:var(--muted);margin-top:3px;white-space:nowrap}
+  td.c-n,td.c-eng{white-space:normal} td.c-n{min-width:170px} td.c-eng{min-width:150px;max-width:220px}
+  td.c-eng .s2 .tag{font-size:11px;padding:1px 7px}
+  .soldb{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;background:var(--bad);color:#fff;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+  tr.sold td{opacity:.55} tr.sold td.c-n{opacity:1} tr.sold td.c-n a.car{opacity:.55}
+  .lft{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .sw{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;cursor:pointer;user-select:none}
+  .sw input{position:absolute;opacity:0;width:0;height:0}
+  .sw .trk{position:relative;width:34px;height:20px;border-radius:999px;background:var(--line);transition:.2s;flex:none}
+  .sw .trk::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 2px #0003;transition:.2s}
+  .sw input:checked+.trk{background:var(--accent)} .sw input:checked+.trk::after{left:16px}
+  .sw input:focus-visible+.trk{outline:2px solid var(--accent);outline-offset:2px}
+  @media (max-width:1180px){ .c-seller{display:none} th,td{padding:8px 7px} }
+  @media (max-width:1000px){ .c-rank,.c-sv{display:none} }
   @media (max-width:860px){ table{display:none} #mcards{display:block} .wrap{overflow:visible} }
   @media (max-width:600px){
     header{padding:14px 12px 4px} h1{font-size:19px}
-    .panel{margin:10px 12px;padding:12px;grid-template-columns:1fr 1fr;gap:10px}
+    .panel{width:auto;margin:10px 12px;padding:12px;grid-template-columns:1fr 1fr;gap:10px}
     .panel .f:first-child{grid-column:1/-1}
-    .wrap,.bar,.pot,.tabs{padding-left:12px;padding-right:12px}
+    .wrap,.bar,.pot,.tabs,.topctl{padding-left:12px;padding-right:12px}
     .tab{flex:1;padding:9px 8px;font-size:13px}
     .cards{grid-template-columns:1fr}
   }
@@ -121,8 +134,8 @@
 </section>
 
 <div class="view" id="v-top">
-<div class="cats" id="cats"></div>
-<div class="fuelbar" id="fuelbar"></div>
+<div class="topctl"><div class="cats" id="cats"></div>
+<div class="fuelbar" id="fuelbar"></div></div>
 <div class="panel">
   <div class="f"><label>Пошук (модель, місто)</label><input type="text" id="q" placeholder="напр. Mazda, Kraków, червона"></div>
   <div class="f"><label>Мін. оцінка: <span class="val" id="vScore"></span></label><input type="range" id="minScore" min="5" max="10" step="0.1"></div>
@@ -136,7 +149,7 @@
 </div>
 
 <div class="bar">
-  <div class="count" id="count"></div>
+  <div class="lft"><label class="sw"><input type="checkbox" id="showSold"><span class="trk"></span>Показувати продані</label><div class="count" id="count"></div></div>
   <div class="btns"><button class="reset" id="check">🔄 Перевірити, що продано</button><button class="reset" id="reset">Скинути фільтри</button></div>
 </div>
 
@@ -152,6 +165,7 @@
 
 <script>
 let R=[];
+let SHOWSOLD=true;try{SHOWSOLD=localStorage.getItem('carsSold')!=='0';}catch(e){}
 let CAT='car';try{CAT=localStorage.getItem('carsCat')||'car';}catch(e){}
 const CATN={car:'🚗 Легкові (седани, хетчбеки, універсали)',suv:'🚙 Кросовери / позашляховики'};
 function renderCats(){$('cats').innerHTML=Object.keys(CATN).map(k=>`<button class="cat ${k===CAT?'on':''}" data-c="${k}">${CATN[k]} <span>${R.filter(r=>r.cat===k&&r.status!=='sold').length}</span></button>`).join('');document.querySelectorAll('.cat').forEach(b=>b.onclick=()=>{CAT=b.dataset.c;try{localStorage.setItem('carsCat',CAT);}catch(e){}renderCats();render();});}
@@ -166,9 +180,8 @@ function renderPot(){
 }
 
 const COLS=[
- {k:'rank',t:'#'},{k:'n',t:'Машина'},{k:'score',t:'Оцінка'},{k:'eng',t:'Мотор'},{k:'gb',t:'Коробка'},{k:'sv',t:'Обслуговування'},{k:'fc',t:'Розхід, л/100'},
- {k:'year',t:'Рік'},{k:'km',t:'Пробіг'},{k:'price',t:'Ціна, zł'},{k:'city',t:'Місто'},{k:'dist',t:'~км'},
- {k:'seller',t:'Продавець'},{k:'origin',t:'Походження'},{k:'note',t:'Коротко'}
+ {k:'rank',t:'#'},{k:'n',t:'Машина'},{k:'score',t:'Оцінка'},{k:'eng',t:'Мотор і коробка'},{k:'year',t:'Рік · пробіг'},
+ {k:'price',t:'Ціна, zł'},{k:'fc',t:'Розхід'},{k:'sv',t:'Обслуг.'},{k:'dist',t:'Де'},{k:'seller',t:'Продавець'}
 ];
 
 const $=id=>document.getElementById(id);
@@ -188,7 +201,7 @@ const SVL=['Дешеве','Нормальне','Дороге','Дуже доро
 const svt=r=>r.sv==null?'—':`<span class="sv sv${r.sv}">${SVL[r.sv]}</span>`;
 let FP={'Бензин':5.7,'Дизель':7.6,'Гібрид':5.7,'LPG':3.0};try{const x=JSON.parse(localStorage.getItem('carsFP')||'null');if(x)Object.assign(FP,x);FP['Гібрид']=FP['Бензин'];}catch(e){}
 function fuelBar(){$('fuelbar').innerHTML=`<span class="fbt">⛽ Ціни пального, zł/л:</span><label>Бензин <input id="fpB" type="number" step="0.01" min="0" value="${FP['Бензин']}"></label><label>Дизель <input id="fpD" type="number" step="0.01" min="0" value="${FP['Дизель']}"></label><label>Газ <input id="fpL" type="number" step="0.01" min="0" value="${FP['LPG']}"></label><button class="reset" id="fpGo">Застосувати</button>`;$('fpGo').onclick=()=>{const g=id=>{const v=parseFloat(String($(id).value).replace(',','.'));return v>0?v:null;};const b=g('fpB'),d=g('fpD'),l=g('fpL');if(b)FP['Бензин']=FP['Гібрид']=b;if(d)FP['Дизель']=d;if(l)FP['LPG']=l;try{localStorage.setItem('carsFP',JSON.stringify({'Бензин':FP['Бензин'],'Дизель':FP['Дизель'],'LPG':FP['LPG']}));}catch(e){}render();toast('Ціни застосовано до всіх машин');};}
-const fct=r=>{if(r.fc==null)return '—';const lpg=r.fuel==='Бензин+LPG';const zl=lpg?r.fc*1.2*FP['LPG']:r.fc*(FP[r.fuel]||FP['Бензин']);return `${r.fc.toFixed(1)} л${lpg?' (бенз.)':''}<span class="fcz" title="Орієнтовно: бензин 6.0, дизель 6.1, газ 3.0 zł/л">≈${Math.round(zl)} zł/100 км${lpg?' на газу':''}</span>`;};
+const fct=r=>{if(r.fc==null)return '—';const lpg=r.fuel==='Бензин+LPG';const zl=lpg?r.fc*1.2*FP['LPG']:r.fc*(FP[r.fuel]||FP['Бензин']);return `${r.fc.toFixed(1)} л${lpg?' (бенз.)':''}<span class="fcz" title="За цінами з рядка «Ціни пального»">≈${Math.round(zl)} zł/100 км${lpg?' на газу':''}</span>`;};
 const OPEN=new Set();
 const lst=a=>a&&a.length?'<ul>'+a.map(x=>`<li>${x}</li>`).join('')+'</ul>':'';
 function det(r){
@@ -214,7 +227,7 @@ function render(){
   $('vPrice').textContent=f.maxPrice>=45000?'будь-яка':fmt(f.maxPrice)+' zł';
   try{localStorage.setItem('carsF',JSON.stringify(f));}catch(e){}
   let rows=R.filter(r=>
-    (r.cat||'car')===CAT &&
+    (r.cat||'car')===CAT && (SHOWSOLD||r.status!=='sold') &&
     r.score>=f.minScore-1e-9 && (f.maxDist>=650||r.dist<=f.maxDist) && (f.maxPrice>=45000||r.price<=f.maxPrice) &&
     (!f.fuel||r.fuel===f.fuel) && (!f.gb||r.gb===f.gb) && (!f.seller||r.seller===f.seller) && (!f.brand||r.brand===f.brand) &&
     (!f.origin|| (f.origin==='pl'&&r.origin==='Польща') || (f.origin==='imp'&&r.origin!=='Польща') || (f.origin==='noam'&&r.origin!=='США'&&r.origin!=='Канада')) &&
@@ -225,14 +238,16 @@ function render(){
   document.querySelectorAll('th').forEach(th=>th.onclick=()=>{const k=th.dataset.k;if(sortK===k)sortDir*=-1;else{sortK=k;sortDir=(['score','year','pot'].includes(k)?-1:1);}render();});
   $('body').innerHTML=rows.length?rows.map(r=>`<tr class="main ${r.status==='sold'?'sold':''} ${OPEN.has(r.url)?'open':''}" data-u="${r.url}">
     <td class="rank c-rank">${r.rank}</td>
-    <td class="c-n"><span class="chev">▶</span><a class="car" href="${r.url}" target="_blank" rel="noopener">${r.n}</a>${clr(r)}</td>
+    <td class="c-n"><span class="chev">▶</span><a class="car" href="${r.url}" target="_blank" rel="noopener">${r.n}</a>${clr(r)}${r.status==='sold'?'<span class="soldb">продано</span>':''}</td>
     <td class="c-score"><span class="score" style="background:${color(r.score)}">${r.score.toFixed(1)}</span></td>
-    <td class="c-eng">${r.eng}</td><td class="c-gb"><span class="tag">${r.gb}</span></td><td class="c-sv">${svt(r)}</td><td class="num c-fc">${fct(r)}</td>
-    <td class="num c-year">${r.year}</td><td class="num c-km">${fmt(r.km)}</td><td class="num c-price">${fmt(r.price)}${pc(r)}</td>
-    <td class="c-city">${r.city}</td><td class="num c-dist">${r.dist}</td><td class="c-seller">${r.seller}</td><td class="c-origin">${r.origin}</td>
-    <td class="note c-note">${r.status==='sold'?'<b>ПРОДАНО / ЗНЯТО.</b> ':''}${r.note}</td></tr>${OPEN.has(r.url)?`<tr class="det"><td colspan="15">${det(r)}</td></tr>`:''}`).join(''):`<tr><td colspan="15" class="empty">Нічого не знайдено — послаб фільтри</td></tr>`;
+    <td class="c-eng">${r.eng}<span class="s2"><span class="tag">${r.gb}</span></span></td>
+    <td class="num c-year">${r.year}<span class="s2">${fmt(r.km)} км</span></td>
+    <td class="num c-price">${fmt(r.price)}${pc(r)}</td>
+    <td class="num c-fc">${fct(r)}</td><td class="c-sv">${svt(r)}</td>
+    <td class="c-dist">${r.city}<span class="s2">~${r.dist} км</span></td>
+    <td class="c-seller">${r.seller}<span class="s2">${r.origin}</span></td></tr>${OPEN.has(r.url)?`<tr class="det"><td colspan="10">${det(r)}</td></tr>`:''}`).join(''):`<tr><td colspan="10" class="empty">Нічого не знайдено — послаб фільтри</td></tr>`;
   $('mcards').innerHTML=rows.length?rows.map(r=>`<div class="mc ${r.status==='sold'?'sold':''} ${OPEN.has(r.url)?'open':''}" data-u="${r.url}">
-    <div class="mc-top"><span class="rank">#${r.rank}</span><a class="car" href="${r.url}" target="_blank" rel="noopener">${r.n}</a>${clr(r)}<span class="score" style="background:${color(r.score)}">${r.score.toFixed(1)}</span></div>
+    <div class="mc-top"><span class="rank">#${r.rank}</span><a class="car" href="${r.url}" target="_blank" rel="noopener">${r.n}</a>${clr(r)}${r.status==='sold'?'<span class="soldb">продано</span>':''}<span class="score" style="background:${color(r.score)}">${r.score.toFixed(1)}</span></div>
     <div class="mc-grid">
       <div><span>Ціна</span><b>${fmt(r.price)} zł</b>${pc(r)}</div>
       <div><span>Рік</span><b>${r.year}</b></div>
@@ -247,13 +262,13 @@ function render(){
     </div>
     ${OPEN.has(r.url)?det(r):`<div class="mc-note">${r.status==='sold'?'<b>ПРОДАНО / ЗНЯТО.</b> ':''}${r.note}</div>`}
     <div class="more"><span class="chev">▶</span>${OPEN.has(r.url)?'Згорнути':'Плюси, мінуси, підсумок'}</div></div>`).join(''):'<div class="empty">Нічого не знайдено — послаб фільтри</div>';
-  const ns=R.filter(r=>r.status==='sold').length;$('count').textContent=`Показано ${rows.length} з ${R.filter(r=>(r.cat||'car')===CAT).length} (${CAT==='suv'?'кросовери':'легкові'}) · оцінка 10 = ${CAT==='suv'?'найкращий кросовер':'найкраща легкова'} за 40 тис.`+(ns?` · продано/знято: ${ns}`:'');
+  const inC=R.filter(r=>(r.cat||'car')===CAT),ns=inC.filter(r=>r.status==='sold').length;$('count').textContent=`Показано ${rows.length} з ${inC.length}`+(ns?` · продано/знято: ${ns}`:'');
 }
 function opts(id,vals,all){const s=$(id);s.innerHTML='<option value="">'+all+'</option>'+vals.map(v=>`<option>${v}</option>`).join('');}
 function buildOpts(){
 opts('fuel',[...new Set(R.map(r=>r.fuel))],'Будь-яке');
 opts('gb',[...new Set(R.map(r=>r.gb))],'Будь-яка');
-opts('seller',['Приватний','Фірма'],'Будь-який');
+opts('seller',[...new Set(R.map(r=>r.seller))],'Будь-який');
 $('origin').innerHTML='<option value="">Будь-яке</option><option value="pl">Тільки Польща</option><option value="imp">Тільки пригнані</option><option value="noam">Без США/Канади</option>';
 opts('brand',[...new Set(R.map(r=>r.brand))].sort(),'Усі марки');
 }
@@ -274,8 +289,9 @@ function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clear
 
 async function init(){
   try{ R=await (await fetch('data.json',{cache:'no-store'})).json(); }
-  catch(e){ $('body').innerHTML='<tr><td colspan="15" class="empty">Не вдалося завантажити дані</td></tr>'; return; }
+  catch(e){ $('body').innerHTML='<tr><td colspan="10" class="empty">Не вдалося завантажити дані</td></tr>'; return; }
   prep(); buildOpts(); renderCats(); fuelBar();
+  $('showSold').checked=SHOWSOLD;$('showSold').onchange=e=>{SHOWSOLD=e.target.checked;try{localStorage.setItem('carsSold',SHOWSOLD?'1':'0');}catch(_){}render();};
   let saved=null;try{saved=JSON.parse(localStorage.getItem('carsF')||'null');}catch(e){}
 setUI(Object.assign({},D,saved||{}));
 ['q','minScore','maxDist','maxPrice','fuel','gb','seller','origin','brand'].forEach(id=>$(id).addEventListener('input',render));
